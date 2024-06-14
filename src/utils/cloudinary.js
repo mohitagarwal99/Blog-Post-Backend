@@ -1,30 +1,52 @@
-import {v2 as cloudinary} from "cloudinary";
+import {v2 as cloudinary} from 'cloudinary';
 import fs from "fs";
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secrte: process.env.CLOUDINARY_API_SCRET
+//Cloudinary Configuration
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SCRET // Click 'View Credentials' below to copy your API secret
 });
+
 
 const uploadOnCloud = async (localFilePath) => {
     try {
-        if(!localFilePath)
+
+        if(!localFilePath){
             return null;
-    
-        const uploadResult = await cloudinary.uploader.upload(localFilePath, {
-            resource_Type: "auto"
         }
+
+        //Upload the file path
+        const uploadResult = await cloudinary.uploader.upload(localFilePath, 
+            {
+                resource_type: "auto",
+            },
         );
-    
+        // console.log("File uploaded successfully ", uploadResult);
         console.log("File uploaded successfully, url: ", uploadResult.url);
         fs.unlinkSync(localFilePath);
         return uploadResult;
+
     } catch (error) {
-        fs.unlinkSync(localFilePath);
+        fs.unlinkSync(localFilePath); //remove temporarirly save locally file synchronously
         return null;
     }
-
 }
 
-export default uploadOnCloud;
+
+const deleteOnCloud = async (publicId) => {
+    try {
+        if (!publicId)
+            return null;
+        const deleteResult = await cloudinary.uploader.destroy(publicId);
+        console.log("File deleted successfully");
+        return deleteResult;
+    } catch (error) {
+        return null;
+    }
+};
+
+export {
+    uploadOnCloud,
+    deleteOnCloud
+}
