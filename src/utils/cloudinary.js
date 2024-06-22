@@ -34,17 +34,32 @@ const uploadOnCloud = async (localFilePath) => {
 }
 
 
-const deleteOnCloud = async (publicId) => {
+const findPublicId = (url) =>{
+    const parsedPath = path.parse(url);
+    return parsedPath.name;
+}
+
+const deleteOnCloud = async (url) =>{
     try {
-        if (!publicId)
+        if(!url){
             return null;
-        const deleteResult = await cloudinary.uploader.destroy(publicId);
-        console.log("File deleted successfully");
-        return deleteResult;
-    } catch (error) {
-        return null;
+        }
+        //Delete the file from cloud
+        const id = findPublicId(url);
+        const deleteResult = await cloudinary.uploader.destroy(id, {resource_type: "image"});
+
+
+        if(deleteResult.result === 'ok'){
+            console.log("File deleted successfully ", deleteResult);
+            return true;
+        }
+        return false;
     }
-};
+    catch (error){
+        console.log(error)
+        return false;
+    }
+}
 
 export {
     uploadOnCloud,
